@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 
@@ -7,7 +7,8 @@ type SquareProps = {
     onClick: () => void
 }
 
-function Square(props: SquareProps) {
+function SquareFunction(props: SquareProps) {
+    console.log(`Square Render`);
     return (
         <button
             className="square"
@@ -18,12 +19,19 @@ function Square(props: SquareProps) {
     );
 }
 
+const Square = React.createFactory(SquareFunction);
+
 type BoardProps = {
     squares: string[],
     onClick: (index: number) => void
 }
 
-class Board extends React.Component<BoardProps> {
+class BoardComponent extends React.Component<BoardProps> {
+
+    constructor(props: BoardProps, private name: string){
+        super(props);
+        console.log(`Board`);
+    }
 
     renderSquare(index: number) {
         return <Square
@@ -34,6 +42,8 @@ class Board extends React.Component<BoardProps> {
 
     render() {
         return (
+        <div>
+            <span>name: {this.name}</span>
             <div>
                 <div className="board-row">
                     {this.renderSquare(0)}
@@ -51,9 +61,21 @@ class Board extends React.Component<BoardProps> {
                     {this.renderSquare(8)}
                 </div>
             </div>
+        </div>
         );
     }
 }
+
+function wrapComponent<P>(component: new (...args: any[]) => Component<P, any>){
+
+    return class extends component{
+        constructor(props: P){
+            super(props, "nameFromSuper")
+        }
+    }
+}
+
+const Board = wrapComponent(BoardComponent);
 
 type GameState = {
     history: string[][],
@@ -61,12 +83,8 @@ type GameState = {
     stepNumber: number,
 }
 
-type GameProps = {
-
-}
-
-class Game extends React.Component<GameProps, GameState> {
-    constructor(props: GameProps){
+class Game extends React.Component<{}, GameState> {
+    constructor(props: {}){
         super(props)
 
         this.state = {
